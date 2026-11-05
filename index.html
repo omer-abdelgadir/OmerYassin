@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omer Yassin - Electronics Engineer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        /* Preloader Styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0d1117;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.75s ease-in-out, visibility 0.75s ease-in-out;
+        }
+        #preloader.loaded {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loader-logo {
+            animation: pulse 2s infinite ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .hidden-for-loading {
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s 0.5s, opacity 0.5s ease-in-out;
+        }
+        .visible-after-loading {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .pcb-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(34, 197, 94, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(34, 197, 94, 0.07) 1px, transparent 1px);
+            background-size: 35px 35px;
+            transition: background-position 0.5s ease-out; /* For parallax */
+        }
+
+        .section-title {
+            @apply text-3xl md:text-4xl font-bold text-gray-100 mb-16 text-center;
+        }
+        
+        .glass-card {
+            background: rgba(22, 27, 34, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid #30363d;
+            border-radius: 0.75rem;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card:before {
+            content: "";
+            position: absolute;
+            left: var(--mouse-x, -1000px);
+            top: var(--mouse-y, -1000px);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0) 80%);
+            transform: translate(-50%, -50%);
+            transition: left 0.2s ease, top 0.2s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+        .glass-card-image {
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .glass-card:hover .glass-card-image {
+            transform: scale(1.05);
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1em;
+            background-color: #22c55e;
+            animation: blink 1s infinite;
+            margin-left: 4px;
+            vertical-align: bottom;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 3rem;
+            padding-bottom: 3rem;
+            border-left: 2px solid #30363d;
+        }
+        .timeline-item:last-child {
+            border-left: 2px solid transparent;
+            padding-bottom: 0;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -0.7rem;
+            top: 0.25rem;
+            height: 1.25rem;
+            width: 1.25rem;
+            background-color: #0d1117;
+            border: 3px solid #22c55e;
+            border-radius: 50%;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: #161b22;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            border: 1px solid #30363d;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            opacity: 0;
+            position: relative;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .nav-link-hover {
+            position: relative;
+        }
+        .nav-link-hover::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #22c55e;
+            transition: width 0.3s ease;
+        }
+        .nav-link-hover:hover::after {
+            width: 100%;
+        }
+
+        .scroll-down-arrow {
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .magnetic-button {
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .animated-icon {
+            transition: transform 0.3s ease;
+        }
+        .animated-icon:hover {
+            transform: scale(1.2);
+        }
+
+        /* Scrolled Header Style */
+        header.scrolled {
+            background-color: rgba(13, 17, 23, 0.85); /* #0d1117 with opacity */
+            backdrop-filter: blur(10px);
+            border-bottom-color: #30363d;
+        }
+
+        /* Animation Classes for JS */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Gemini Feature Styles */
+        .gemini-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #22c55e;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #gemini-results ul { list-style: none; padding: 0;}
+        #gemini-results li {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border-left: 3px solid #22c55e;
+        }
+        #gemini-results strong {
+            display: block;
+            color: #86efac;
+            margin-bottom: 0.25rem;
+        }
+
+    </style>
+</head>
+<body class="text-gray-300">
+    <div id="preloader">
+        <svg class="w-16 h-16 text-green-400 loader-logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9 9L12 12L15 9" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 12V15" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <div class="pcb-bg"></div>
+
+    <!-- Header & Navigation -->
+    <header id="main-header" class="sticky top-0 z-50 border-b border-transparent transition-all duration-300 hidden-for-loading">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#hero" class="text-xl md:text-2xl font-bold text-white flex items-center">
+                <svg class="w-8 h-8 mr-3 text-green-400 animated-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 9L12 12L15 9" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 12V15" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Omer Yassin</span>
+            </a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#about" class="nav-link-hover text-gray-300 hover:text-green-400 transition duration-300">About</a>
+                <a href="#education" class="nav-link-hover text-gray-300 hover:text-green-400 transition duration-300">Education</a>
+                <a href="#certificates" class="nav-link-hover text-gray-300 hover:text-green-400 transition duration-300">Certificates</a>
+                <a href="#blog" class="nav-link-hover text-gray-300 hover:text-green-400 transition duration-300">Blog</a>
+                <a href="#skills" class="nav-link-hover text-gray-300 hover:text-green-400 transition duration-300">Skills</a>
+                <a href="#contact" class="nav-link-hover text-gray-300 hover:text-green-400 transition duration-300">Contact</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-300 hover:text-green-400 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-800/90 backdrop-blur-sm">
+            <a href="#about" class="nav-link block px-6 py-3 text-sm text-gray-300 hover:bg-gray-700">About</a>
+            <a href="#education" class="nav-link block px-6 py-3 text-sm text-gray-300 hover:bg-gray-700">Education</a>
+            <a href="#certificates" class="nav-link block px-6 py-3 text-sm text-gray-300 hover:bg-gray-700">Certificates</a>
+            <a href="#blog" class="nav-link block px-6 py-3 text-sm text-gray-300 hover:bg-gray-700">Blog</a>
+            <a href="#skills" class="nav-link block px-6 py-3 text-sm text-gray-300 hover:bg-gray-700">Skills</a>
+            <a href="#contact" class="nav-link block px-6 py-3 text-sm text-gray-300 hover:bg-gray-700">Contact</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="container mx-auto px-6 relative z-10 hidden-for-loading">
+
+        <!-- Hero Section -->
+        <section id="hero" class="relative flex flex-col items-center justify-center py-24 min-h-screen text-center">
+            <div class="relative z-10 md:w-3/4 animate-on-scroll">
+                <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">
+                    <span id="typing-text"></span><span class="typing-cursor"></span>
+                </h1>
+                <p class="text-xl text-green-400 font-semibold mb-6">Building the Hardware for Artificial Intelligence</p>
+                <p class="text-lg max-w-3xl mx-auto mb-8 leading-relaxed">
+                    An electronics engineering graduate on a mission to design the next generation of high-performance SoCs and custom accelerators for AI and Machine Learning. My portfolio documents a deliberate journey from digital logic fundamentals to building a complete, custom System-on-a-Chip.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#contact" class="magnetic-button border-2 border-green-500 text-green-400 font-bold py-3 px-6 rounded-lg hover:bg-green-500 hover:text-white transition duration-300 transform hover:scale-105">Get In Touch</a>
+                    <a href="#" class="magnetic-button border-2 border-green-500 text-green-400 font-bold py-3 px-6 rounded-lg hover:bg-green-500 hover:text-white transition duration-300 transform hover:scale-105">Download CV</a>
+                </div>
+            </div>
+            <a href="#about" class="absolute bottom-10 z-10 scroll-down-arrow">
+                <svg class="w-8 h-8 text-gray-500 hover:text-green-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </a>
+        </section>
+
+        <!-- About Me Section -->
+        <section id="about" class="py-24">
+             <div class="max-w-6xl mx-auto mb-16 animate-on-scroll">
+                <div class="flex items-center">
+                    <div class="glass-card p-3 rounded-full mr-4">
+                        <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-100">About Me</h2>
+                        <div class="h-1 w-20 bg-green-500 rounded mt-2"></div>
+                    </div>
+                </div>
+            </div>
+             <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-16 items-center">
+                <!-- Text Content -->
+                <div class="md:col-span-3 animate-on-scroll" data-delay="100">
+                    <p class="text-lg mb-8 text-gray-300 leading-relaxed">
+                        As a recent graduate, my academic journey has been dedicated to mastering the principles of electronics, from component-level circuit design to system-level integration. I am driven by a passion for creating elegant and efficient hardware solutions. I thrive in collaborative settings and am committed to continuous learning to stay at the forefront of technology.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="glass-card p-4">
+                            <svg class="w-8 h-8 mx-auto mb-2 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.456-2.456L12.75 18l1.178-.398a3.375 3.375 0 002.456-2.456L16.5 14.25l.398 1.178a3.375 3.375 0 002.456 2.456l1.178.398-1.178.398a3.375 3.375 0 00-2.456 2.456z" />
+                            </svg>
+                            <h4 class="font-semibold text-white">Problem Solver</h4>
+                        </div>
+                        <div class="glass-card p-4">
+                            <svg class="w-8 h-8 mx-auto mb-2 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
+                            </svg>
+                            <h4 class="font-semibold text-white">Hardware Focused</h4>
+                        </div>
+                        <div class="glass-card p-4">
+                            <svg class="w-8 h-8 mx-auto mb-2 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                            </svg>
+                            <h4 class="font-semibold text-white">Fast Learner</h4>
+                        </div>
+                    </div>
+                </div>
+                <!-- Image Content -->
+                <div class="md:col-span-2 flex justify-center md:justify-end animate-on-scroll" data-delay="200">
+                     <div class="relative w-80 h-96 rounded-lg group">
+                        <div class="absolute inset-0 bg-green-500/80 rounded-lg transform -rotate-6 transition-transform duration-500 group-hover:rotate-0"></div>
+                        <img src="https://i.postimg.cc/Snk5X3fW/profile-web.jpg" alt="Omer Yassin" class="relative w-full h-full object-cover rounded-lg shadow-2xl">
+                    </div>
+                </div>
+             </div>
+        </section>
+
+        <!-- Education Section -->
+        <section id="education" class="py-24">
+            <div class="max-w-3xl mx-auto mb-16 animate-on-scroll">
+                <div class="flex items-center">
+                    <div class="glass-card p-3 rounded-full mr-4">
+                         <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-.07.002z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-100">Education</h2>
+                        <div class="h-1 w-20 bg-green-500 rounded mt-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="max-w-3xl mx-auto animate-on-scroll" data-delay="100">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <p class="text-sm text-gray-400 mb-1">2019 - 2025</p>
+                    <h3 class="text-xl font-bold text-white">B.Eng in Electronics Engineering</h3>
+                    <p class="text-green-400 font-semibold mb-2">Future University, Khartoum, Sudan</p>
+                    <p class="text-gray-300">Graduated with a strong focus on embedded systems and digital logic. My coursework was complemented by hands-on projects, including the development of an FPGA-based audio processor and an autonomous robotics platform, solidifying my practical skills.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Certificates & Awards Section -->
+        <section id="certificates" class="py-24">
+            <div class="max-w-5xl mx-auto mb-16 animate-on-scroll">
+                 <div class="flex items-center">
+                    <div class="glass-card p-3 rounded-full mr-4">
+                         <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.456-2.456L12.75 18l1.178-.398a3.375 3.375 0 002.456-2.456L16.5 14.25l.398 1.178a3.375 3.375 0 002.456 2.456l1.178.398-1.178.398a3.375 3.375 0 00-2.456 2.456z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-100">Certificates & Awards</h2>
+                        <div class="h-1 w-20 bg-green-500 rounded mt-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
+                <div class="glass-card p-6 flex items-center animate-on-scroll" data-delay="100">
+                    <svg class="w-12 h-12 text-green-400 mr-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-white text-lg">Altium Designer - PCB Design</h3>
+                        <p class="text-green-400">Altium</p>
+                    </div>
+                </div>
+                <div class="glass-card p-6 flex items-center animate-on-scroll" data-delay="100">
+                    <svg class="w-12 h-12 text-green-400 mr-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-.07.002z" />
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-white text-lg">Dean's List for Academic Excellence</h3>
+                        <p class="text-green-400">Future University</p>
+                    </div>
+                </div>
+                <div class="glass-card p-6 flex items-center animate-on-scroll" data-delay="200">
+                     <svg class="w-12 h-12 text-green-400 mr-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-white text-lg">Certified Associate in Python Programming</h3>
+                        <p class="text-green-400">Python Institute</p>
+                    </div>
+                </div>
+                <div class="glass-card p-6 flex items-center animate-on-scroll" data-delay="300">
+                     <svg class="w-12 h-12 text-green-400 mr-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    <div>
+                        <h3 class="font-bold text-white text-lg">IPC Certified Interconnect Designer</h3>
+                        <p class="text-green-400">IPC</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Section -->
+        <section id="blog" class="py-24">
+            <div class="max-w-6xl mx-auto mb-16 animate-on-scroll">
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <div class="flex items-center">
+                        <div class="glass-card p-3 rounded-full mr-4">
+                             <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl md:text-4xl font-bold text-gray-100">From the Blog</h2>
+                            <div class="h-1 w-20 bg-green-500 rounded mt-2"></div>
+                        </div>
+                    </div>
+                    <button id="open-gemini-modal" class="glass-card px-4 py-2 rounded-lg text-green-400 font-semibold hover:bg-green-500 hover:text-white transition-colors duration-300 flex items-center">
+                        <span class="mr-2">✨</span> Generate Blog Ideas
+                    </button>
+                </div>
+            </div>
+            <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Featured Blog Post -->
+                <div class="glass-card lg:col-span-2 overflow-hidden flex flex-col animate-on-scroll" data-delay="100">
+                    <img src="https://placehold.co/800x600/0d1117/22c55e?text=Smart+Agriculture" alt="Smart Agriculture" class="w-full h-80 object-cover glass-card-image">
+                    <div class="p-8 flex flex-col flex-grow">
+                        <h3 class="text-2xl font-bold mb-2 text-white">The Future of Farming: An IoT Approach</h3>
+                        <p class="text-gray-400 mb-6 flex-grow">A look into how IoT systems can optimize water usage and monitor crop health, solving critical agricultural challenges. This post explores the design of a low-power, long-range monitoring solution.</p>
+                        <button data-modal-target="project4-modal" class="font-semibold text-green-400 hover:text-green-300 self-start text-lg mt-auto">Read More &rarr;</button>
+                    </div>
+                </div>
+
+                <!-- Other Blog Post 1 -->
+                <div class="glass-card overflow-hidden flex flex-col animate-on-scroll" data-delay="200">
+                    <img src="https://placehold.co/600x400/0d1117/3b82f6?text=FPGA+Waveform" alt="FPGA Audio Equalizer" class="w-full h-56 object-cover glass-card-image">
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="text-xl font-bold mb-2 text-white">Deep Dive: Real-Time Audio with FPGAs</h3>
+                        <p class="text-gray-400 mb-4 flex-grow">Exploring the development of a real-time, multi-band audio equalizer on a Xilinx FPGA, and the power of VHDL for high-performance digital signal processing.</p>
+                        <button data-modal-target="project2-modal" class="font-semibold text-green-400 hover:text-green-300 self-start mt-auto">Read More &rarr;</button>
+                    </div>
+                </div>
+
+                <!-- Other Blog Post 2 -->
+                <div class="glass-card overflow-hidden flex flex-col animate-on-scroll" data-delay="300">
+                    <img src="https://placehold.co/600x400/0d1117/818cf8?text=Haptic+Navigation" alt="Haptic Navigation System" class="w-full h-56 object-cover glass-card-image">
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h3 class="text-xl font-bold mb-2 text-white">Tech for Good: A Haptic Navigator</h3>
+                        <p class="text-gray-400 mb-4 flex-grow">A walkthrough of the design process for a wearable device for the visually impaired that uses ultrasonic sensors and haptic feedback to navigate environments safely.</p>
+                        <button data-modal-target="project5-modal" class="font-semibold text-green-400 hover:text-green-300 self-start mt-auto">Read More &rarr;</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Core Competencies Section -->
+        <section id="skills" class="py-24">
+            <div class="max-w-6xl mx-auto mb-16 animate-on-scroll">
+                <div class="flex items-center">
+                    <div class="glass-card p-3 rounded-full mr-4">
+                        <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-100">Core Competencies</h2>
+                        <div class="h-1 w-20 bg-green-500 rounded mt-2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="max-w-6xl mx-auto space-y-12">
+                <!-- Hardware Design -->
+                <div class="animate-on-scroll" data-delay="100">
+                    <div class="flex items-center mb-6">
+                        <div class="glass-card p-3 rounded-full mr-4">
+                            <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008z" /></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">Hardware Design</h3>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass-card p-4 text-center">PCB Design (Altium)</div>
+                        <div class="glass-card p-4 text-center">Analog Circuits</div>
+                        <div class="glass-card p-4 text-center">Digital Logic</div>
+                        <div class="glass-card p-4 text-center">Power Electronics</div>
+                    </div>
+                </div>
+                <!-- Embedded Systems -->
+                <div class="animate-on-scroll" data-delay="200">
+                     <div class="flex items-center mb-6">
+                        <div class="glass-card p-3 rounded-full mr-4">
+                             <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" /></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">Embedded Systems</h3>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass-card p-4 text-center">C/C++ Programming</div>
+                        <div class="glass-card p-4 text-center">STM32 / ESP32</div>
+                        <div class="glass-card p-4 text-center">RTOS Concepts</div>
+                        <div class="glass-card p-4 text-center">I2C / SPI / UART</div>
+                    </div>
+                </div>
+                <!-- Software & Tools -->
+                <div class="animate-on-scroll" data-delay="300">
+                    <div class="flex items-center mb-6">
+                        <div class="glass-card p-3 rounded-full mr-4">
+                            <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                               <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white">Software & Tools</h3>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="glass-card p-4 text-center">Python</div>
+                        <div class="glass-card p-4 text-center">VHDL / Verilog</div>
+                        <div class="glass-card p-4 text-center">MATLAB / LTspice</div>
+                        <div class="glass-card p-4 text-center">Git & GitHub</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-24">
+            <div class="max-w-3xl mx-auto text-center">
+                <div class="flex items-center justify-center mb-6 animate-on-scroll">
+                     <div class="glass-card p-3 rounded-full mr-4">
+                         <svg class="w-8 h-8 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-100 text-left">Get In Touch</h2>
+                        <div class="h-1 w-20 bg-green-500 rounded mt-2"></div>
+                    </div>
+                </div>
+                <p class="text-lg my-6 leading-relaxed animate-on-scroll" data-delay="100">I am actively seeking full-time opportunities where I can apply my skills in electronics engineering. If you have an interesting challenge or a project I can contribute to, please feel free to connect.</p>
+                <div class="glass-card inline-block p-2 rounded-lg animate-on-scroll" data-delay="200">
+                     <a href="mailto:omeryassin82@gmail.com" class="inline-block bg-green-600 text-white font-bold py-4 px-8 rounded-md hover:bg-green-500 transition-colors duration-300 text-lg">
+                        Contact Me
+                    </a>
+                </div>
+            </div>
+            <div class="max-w-2xl mx-auto flex justify-center space-x-8 mt-16 animate-on-scroll" data-delay="300">
+                <a href="mailto:omeryassin82@gmail.com" class="text-gray-500 hover:text-green-400 transition-colors animated-icon">
+                    <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+                </a>
+                 <a href="https://github.com/omer-abdelgadir" target="_blank" rel="noopener noreferrer" class="text-gray-500 hover:text-green-400 transition-colors animated-icon">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </a>
+                <a href="https://www.linkedin.com/in/omer-abdelgadir" target="_blank" rel="noopener noreferrer" class="text-gray-500 hover:text-green-400 transition-colors animated-icon">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                </a>
+                 <a href="tel:+971544267289" class="text-gray-500 hover:text-green-400 transition-colors animated-icon">
+                     <svg class="w-8 h-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 6.75z" /></svg>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-24">
+        <div class="container mx-auto px-6 py-6 text-center text-gray-500">
+            <p>&copy; 2024 Omer Yassin. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Blog Modals -->
+    <div id="project2-modal" class="modal-overlay">
+        <div class="modal-content relative">
+            <button class="close-modal absolute top-4 right-4 text-gray-500 hover:text-white text-3xl">&times;</button>
+            <h2 class="text-2xl font-bold text-white">Deep Dive: Real-Time Audio with FPGAs</h2>
+            <p class="text-gray-400 mt-2 mb-4">Developed a real-time, multi-band audio equalizer on a Xilinx FPGA. This project involved designing and implementing digital filters using VHDL, demonstrating a strong understanding of digital signal processing and hardware description languages.</p>
+            <h3 class="font-bold text-lg text-white mb-2">Key Features</h3>
+            <ul class="list-disc list-inside text-gray-400 mb-4">
+                <li>Five-band adjustable graphic equalizer.</li>
+                <li>High-throughput, low-latency audio processing.</li>
+                <li>Implemented using pipelined FIR filter architecture.</li>
+                <li>Designed and simulated in Vivado Design Suite.</li>
+            </ul>
+            <h3 class="font-bold text-lg text-white mb-2">Technical Stack</h3>
+            <div class="flex flex-wrap gap-2">
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">VHDL</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">Xilinx FPGA</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">Vivado</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">Digital Signal Processing</span>
+            </div>
+        </div>
+    </div>
+    <div id="project4-modal" class="modal-overlay">
+        <div class="modal-content relative">
+            <button class="close-modal absolute top-4 right-4 text-gray-500 hover:text-white text-3xl">&times;</button>
+            <h2 class="text-2xl font-bold text-white">The Future of Farming: An IoT Approach</h2>
+            <p class="text-gray-400 mt-2 mb-4">A comprehensive IoT system designed to optimize water usage and monitor crop health in real-time. This project demonstrates a practical application of low-power electronics and data-driven decision making to solve critical agricultural challenges.</p>
+            <h3 class="font-bold text-lg text-white mb-2">Key Features</h3>
+            <ul class="list-disc list-inside text-gray-400 mb-4">
+                <li>Real-time soil moisture and environmental sensing.</li>
+                <li>Automated irrigation control based on sensor data.</li>
+                <li>Long-range data transmission using LoRaWAN.</li>
+                <li>Cloud-based dashboard for data visualization and analysis.</li>
+            </ul>
+            <h3 class="font-bold text-lg text-white mb-2">Technical Stack</h3>
+            <div class="flex flex-wrap gap-2">
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">STM32 MCU</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">LoRaWAN</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">C++</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">MQTT</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">Grafana</span>
+            </div>
+        </div>
+    </div>
+    <div id="project5-modal" class="modal-overlay">
+        <div class="modal-content relative">
+            <button class="close-modal absolute top-4 right-4 text-gray-500 hover:text-white text-3xl">&times;</button>
+            <h2 class="text-2xl font-bold text-white">Tech for Good: A Haptic Navigator</h2>
+            <p class="text-gray-400 mt-2 mb-4">Designed and built a wearable device that uses ultrasonic sensors to detect obstacles and provides haptic feedback to the user through vibration motors, enabling safer and more independent navigation.</p>
+            <h3 class="font-bold text-lg text-white mb-2">Key Features</h3>
+            <ul class="list-disc list-inside text-gray-400 mb-4">
+                <li>Multi-sensor array for 180-degree obstacle detection.</li>
+                <li>Directional haptic feedback to indicate obstacle location.</li>
+                <li>Low-power design for extended battery life.</li>
+                <li>Compact and ergonomic wearable form factor.</li>
+            </ul>
+            <h3 class="font-bold text-lg text-white mb-2">Technical Stack</h3>
+            <div class="flex flex-wrap gap-2">
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">ESP32</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">C++ (Arduino)</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">Ultrasonic Sensors</span>
+                <span class="bg-green-900/50 text-green-300 text-xs font-semibold px-2.5 py-0.5 rounded">3D Printing</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gemini Blog Idea Modal -->
+    <div id="gemini-modal" class="modal-overlay">
+        <div class="modal-content relative">
+            <button id="close-gemini-modal" class="absolute top-4 right-4 text-gray-500 hover:text-white text-3xl">&times;</button>
+            <h2 class="text-2xl font-bold text-white mb-4">✨ Blog Post Idea Generator</h2>
+            <p class="text-gray-400 mb-4">Enter a topic to generate professional, AI-powered blog post ideas.</p>
+            
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="blog-topic-input" placeholder="e.g., RISC-V, SoC design..." class="w-full bg-gray-900 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                <button id="generate-ideas-button" class="bg-green-600 text-white font-bold py-2 px-4 rounded-md hover:bg-green-500 transition-colors duration-300">Generate</button>
+            </div>
+            
+            <div id="gemini-loader" class="hidden justify-center items-center my-4">
+                <div class="gemini-spinner"></div>
+            </div>
+            
+            <div id="gemini-results" class="mt-4 text-gray-300"></div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const preloader = document.getElementById('preloader');
+            const mainHeader = document.getElementById('main-header');
+            const mainContent = document.getElementById('main-content');
+            
+            window.addEventListener('load', () => {
+                preloader.classList.add('loaded');
+                mainHeader.classList.add('visible-after-loading');
+                mainContent.classList.add('visible-after-loading');
+                
+                setTimeout(() => {
+                    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                        if (el.getBoundingClientRect().top < window.innerHeight * 0.9) {
+                            el.classList.add('is-visible');
+                        }
+                    });
+                }, 500);
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            
+            document.querySelectorAll('#mobile-menu .nav-link').forEach(link => {
+                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+            });
+
+            const textToType = "Omer Yassin";
+            const typingElement = document.getElementById('typing-text');
+            if (typingElement) {
+                let i = 0;
+                function typeWriter() {
+                    if (i < textToType.length) {
+                        typingElement.innerHTML += textToType.charAt(i);
+                        i++;
+                        setTimeout(typeWriter, 100);
+                    }
+                }
+                setTimeout(typeWriter, 750); 
+            }
+
+            // Modal handling
+            document.querySelectorAll('[data-modal-target]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const modal = document.getElementById(button.dataset.modalTarget);
+                    if (modal) modal.classList.add('active');
+                });
+            });
+
+            const closeModal = (modal) => {
+                if (modal) modal.classList.remove('active');
+            };
+
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (event) => {
+                    if (event.target === overlay) closeModal(overlay);
+                });
+            });
+
+            document.querySelectorAll('.close-modal').forEach(button => {
+                 button.addEventListener('click', () => closeModal(button.closest('.modal-overlay')));
+            });
+
+            // Gemini Modal Handling
+            const geminiModal = document.getElementById('gemini-modal');
+            const openGeminiModalBtn = document.getElementById('open-gemini-modal');
+            const closeGeminiModalBtn = document.getElementById('close-gemini-modal');
+            const generateIdeasBtn = document.getElementById('generate-ideas-button');
+            const geminiLoader = document.getElementById('gemini-loader');
+            const geminiResults = document.getElementById('gemini-results');
+            const blogTopicInput = document.getElementById('blog-topic-input');
+
+            openGeminiModalBtn.addEventListener('click', () => geminiModal.classList.add('active'));
+            closeGeminiModalBtn.addEventListener('click', () => closeModal(geminiModal));
+
+            const parseGeminiResponse = (text) => {
+                const lines = text.split('\n').filter(line => line.trim().length > 0);
+                let html = '<ul>';
+                lines.forEach(line => {
+                    // Remove leading characters like '*' or '-'
+                    let cleanLine = line.replace(/^[\*\-]\s*/, '').trim();
+                    // Make title bold
+                    cleanLine = cleanLine.replace(/\*\*(.*?)\*\*/, '<strong>$1</strong>');
+                    html += `<li>${cleanLine}</li>`;
+                });
+                html += '</ul>';
+                return html;
+            };
+            
+            const generateBlogIdeas = async () => {
+                const topic = blogTopicInput.value;
+                if (!topic.trim()) {
+                    geminiResults.innerHTML = `<p class="text-red-400">Please enter a topic.</p>`;
+                    return;
+                }
+
+                geminiLoader.style.display = 'flex';
+                geminiResults.innerHTML = '';
+
+                const systemPrompt = `Act as a world-class content strategist for an electronics engineer specializing in AI hardware. Your tone is professional, insightful, and forward-looking.`;
+                const userQuery = `Generate three compelling and technical blog post ideas based on the topic: "${topic}". For each idea, provide a title and a brief, one-sentence summary. Format the output as a markdown list, with each title in bold.`;
+                
+                const apiKey = ""; // API key is handled by the environment
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API error: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                    if (text) {
+                        geminiResults.innerHTML = parseGeminiResponse(text);
+                    } else {
+                        throw new Error("No content received from API.");
+                    }
+
+                } catch (error) {
+                    console.error("Gemini API Error:", error);
+                    geminiResults.innerHTML = `<p class="text-red-400">Sorry, there was an error generating ideas. Please try again.</p>`;
+                } finally {
+                    geminiLoader.style.display = 'none';
+                }
+            };
+            
+            generateIdeasBtn.addEventListener('click', generateBlogIdeas);
+            blogTopicInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    generateBlogIdeas();
+                }
+            });
+
+
+            // Spotlight card effect
+            document.querySelectorAll('.glass-card').forEach(card => {
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                });
+            });
+
+            // Magnetic button effect
+            document.querySelectorAll('.magnetic-button').forEach(button => {
+                button.addEventListener('mousemove', (e) => {
+                    const rect = button.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    
+                    button.style.transform = `translate(${x * 0.2}px, ${y * 0.3}px) scale(1.05)`;
+                    button.style.transition = 'transform 0.1s ease-out';
+                });
+
+                button.addEventListener('mouseleave', () => {
+                    button.style.transform = 'translate(0, 0) scale(1)';
+                     button.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                });
+            });
+
+            // Parallax and Header Scroll Effect
+            const pcbBg = document.querySelector('.pcb-bg');
+            window.addEventListener('scroll', () => {
+                const offset = window.pageYOffset;
+                if (pcbBg) {
+                    pcbBg.style.backgroundPosition = `0px ${offset * 0.3}px`;
+                }
+                if (offset > 50) {
+                    mainHeader.classList.add('scrolled');
+                } else {
+                    mainHeader.classList.remove('scrolled');
+                }
+            });
+
+            // Intersection Observer for staggered animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const delay = entry.target.dataset.delay || 0;
+                        setTimeout(() => {
+                            entry.target.classList.add('is-visible');
+                        }, parseInt(delay));
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.animate-on-scroll').forEach((el) => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
